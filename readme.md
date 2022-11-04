@@ -2,8 +2,6 @@
 Make a identifier name in topest scope without any negative effect.
 # Api
 ## createNameMaker
-### signature
-(node: SourceNode, retry?: Retry) => (maker: string | NameMaker) => string
 ### import
 ```javascript
 // in esmodule
