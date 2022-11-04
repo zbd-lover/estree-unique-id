@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": [
+      "dom",
+      "es2017"
+    ],
+    "rootDir": "src",
+    "allowJs": false,
+    "checkJs": false,
+    "sourceMap": true,
+    "removeComments": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": "./"
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib",
+    "es"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+	"extends": ["plugin:@typescript-eslint/recommended"],
+	"env": {
+		"es6": true
+	},
+	"parserOptions": {
+		"sourceType": "module"
+	},
+	"rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+		"no-eq-null": "error",
+		"no-debugger": "error",
+		"space-before-blocks": "warn",
+		"space-before-function-paren": "warn",
+		"space-unary-ops": "warn",
+		"arrow-spacing": "warn",
+		"block-spacing": "warn",
+		"semi-spacing": "warn",
+		"space-infix-ops": "warn",
+		"space-in-parens": "warn",
+		"rest-spread-spacing": "warn",
+		"no-extra-semi": "warn",
+		"no-octal-escape": "off",
+		"no-useless-escape": "warn",
+		"quotes": [
+			1,
+			"single"
+		],
+		"semi": [
+			1,
+			"never"
+		]
+	}
+}
