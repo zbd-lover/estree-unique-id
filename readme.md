@@ -2,7 +2,7 @@
 Make a identifier name in topest scope without any negative effect.
 # Api
 ## createNameMaker
-### import
+### use
 ```javascript
 // in esmodule
 import createNameMaker from 'estree-idname-maker'
