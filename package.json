@@ -1,6 +1,6 @@
 {
   "name": "estree-idname-maker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Make a identifier name without any negative effect in topest scope",
   "main": "lib/estree-idname-maker.js",
   "unpkg": "dist/estree-idname-maker.js",
@@ -32,7 +32,7 @@
   "author": "BaoDi Zheng",
   "license": "MIT",
   "dependencies": {
-    "estree-identifier-parser": "^1.0.1"
+    "estree-identifier-parser": "^1.0.5"
   },
   "repository": {
     "type": "git",
