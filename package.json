@@ -1,10 +1,10 @@
 {
   "name": "estree-idname-maker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Make a identifier name without any negative effect in topest scope",
-  "main": "lib/estree-identifier-parser.js",
-  "unpkg": "dist/estree-identifier-parser.js",
-  "module": "es/estree-identifier-parser.js",
+  "main": "lib/estree-idname-maker.js",
+  "unpkg": "dist/estree-idname-maker.js",
+  "module": "es/estree-idname-maker.js",
   "types": "types/index.d.ts",
   "files": [
     "dist",
