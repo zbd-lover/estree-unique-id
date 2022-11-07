@@ -30,30 +30,9 @@ expect(make('console')).toBe('$console')
 ```
 # Types
 ```typescript
-import {
-  ForInStatement,
-  ForOfStatement,
-  ForStatement,
-  BlockStatement,
-  Function,
-  Program,
-  CatchClause,
-  WithStatement,
-  SwitchStatement,
-  ClassBody
-} from 'estree'
-
-type SourceNode = Program |
-  Function |
-  BlockStatement |
-  ForStatement |
-  ForInStatement |
-  ForOfStatement |
-  CatchClause |
-  WithStatement |
-  SwitchStatement |
-  ClassBody
-
+import { Program, BlockStatement } from 'estree'
+export type ContextNode = Program | BlockStatement
 export type Retry = (old: string) => string
 export type NameMaker = string | ((...args: any[]) => string)
+export function createNameMaker(node: ContextNode, retry?: Retry): (make: NameMaker) => string;
 ```
