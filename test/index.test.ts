@@ -1,6 +1,6 @@
 import { parse } from 'acorn'
-import { Program } from 'estree'
-import { createNameMaker } from '../src'
+import type { BlockStatement, FunctionDeclaration, Program } from 'estree'
+import UniqueIdGenerator from '../src'
 
 function parseScript (script: string) {
   return parse(script, {
@@ -9,50 +9,74 @@ function parseScript (script: string) {
   }) as unknown as Program
 }
 
-test('one level scope', () => {
-  const script = `
-    const var1 = 10
-    console.log(var1, var2)
-  `
-  const program = parseScript(script)
-  const make1 = createNameMaker(program, (old) => `$$_${old}`)
-  expect(make1('var1')).toBe('$$_var1')
-  expect(make1(() => 'var1')).toBe('$$_$$_var1')
-  expect(make1(() => '$$_$$_var1')).toBe('$$_$$_$$_var1')
-  expect(make1('console')).toBe('$$_console')
-  expect(make1('var2')).toBe('$$_var2')
+describe('测试核心类：UniqueIdGenerator', () => {
+  test('测试初始化', () => {
+    const generator1 = new UniqueIdGenerator(parseScript('const a = 10'))
+    expect(generator1.generate('a')).toBe('$a')
+    expect(generator1.getGeneratedNames()).toEqual(['$a'])
 
-  const make2 = createNameMaker(program)
-  expect(make2('var1')).toBe('$var1')
-
-  let count = 0
-  const make3 = createNameMaker(program, (old) => {
-    if (count === 0) {
-      count++
-      return old
-    }
-    return `$_${old}`
+    const generator2 = new UniqueIdGenerator(parseScript('const b = 10'), (a: string) => '_' + a)
+    expect(generator2.generate('b')).toBe('_b')
+    expect(generator2.getGeneratedNames()).toEqual(['_b'])
   })
-  expect(make3('var1')).toBe('$_var1')
-})
 
-test('two level scope', () => {
-  const script = `
-    const var1 = 10
-    function fn1(arg1) {
-      window.arg1 = arg1
-      console.log(var1, var2)
-      function fn2() {
-        console.log(globalValue1)
-      }
-    }
-  `
-  const program = parseScript(script)
-  const make = createNameMaker(program, (old) => `$$_${old}`)
-  expect(make('var1')).toBe('$$_var1')
-  expect(make(() => 'var1')).toBe('$$_$$_var1')
-  expect(make('console')).toBe('$$_console')
-  expect(make('window')).toBe('$$_window')
-  expect(make('globalValue1')).toBe('$$_globalValue1')
-  expect(make('globalValue1')).toBe('$$_$$_globalValue1')
+  test('测试方法：setRetry', () => {
+    const generator = new UniqueIdGenerator(parseScript('const a = 10'))
+    const retry = jest.fn((old) => old + '$')
+    generator.setRetry(retry)
+    expect(generator.generate('a')).toBe('a$')
+    expect(generator.getGeneratedNames()).toEqual(['a$'])
+    expect(retry).toBeCalledTimes(1)
+  })
+
+  test('测试方法：setContext', () => {
+    const generator = new UniqueIdGenerator(parseScript('const a = 10'))
+    const script = 'const b = 10'
+    generator.setContext(parseScript(script))
+    expect(generator.generate('a')).toBe('a')
+    expect(generator.getGeneratedNames()).toEqual(['a'])
+  })
+
+  test('应正确处理，当上下文为BlockStatement时', () => {
+    const ast = parseScript('{ const a = 10 }').body[0] as BlockStatement
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.generate('a')).toBe('$a')
+    expect(generator.getGeneratedNames()).toEqual(['$a'])
+  })
+
+  test('应正确处理，当上下文为Function时', () => {
+    const ast = parseScript('function fn1(a) { const b = 10}').body[0] as FunctionDeclaration
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.generate('a')).toBe('$a')
+    expect(generator.generate('b')).toBe('$b')
+    expect(generator.getGeneratedNames()).toEqual(['fn1', '$a', '$b'])
+  })
+
+  test('应正确处理，当变量作用域的层级为多层时', () => {
+    const ast = parseScript('const a = 1; function fn() { console.log(1) }')
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.generate('a')).toBe('$a')
+    expect(generator.generate('console')).toBe('$console')
+    expect(generator.getGeneratedNames()).toEqual(['$a', '$console'])
+  })
+
+  test('测试重试机制是否正常工作', () => {
+    const retry = jest.fn((old) => '_' + old)
+    const generator = new UniqueIdGenerator(parseScript('const a = 10'), retry)
+    expect(generator.generate('a')).toBe('_a')
+    expect(generator.generate('a')).toBe('__a')
+    expect(generator.getGeneratedNames()).toEqual(['_a', '__a'])
+    expect(retry).toBeCalledTimes(3)
+
+    const identifier = jest.fn((old) => old)
+    generator.setRetry(identifier)
+    generator.setContext(parseScript('const b = 10'))
+    expect(() => generator.generate('b')).toThrowError()
+    expect(identifier).toBeCalledTimes(100)
+
+    identifier.mockClear()
+    generator.setMaxRetryTimes(2)
+    expect(() => generator.generate('b')).toThrowError()
+    expect(identifier).toBeCalledTimes(2)
+  })
 })

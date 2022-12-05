@@ -1,38 +1,28 @@
-# Profile
-Make a identifier name in topest scope without any negative effect.
-# Api
-## createNameMaker
-### use
+# 介绍
+基于estree，生成一个安全且唯一的标识符名称
+# 用法
 ```javascript
-// in esmodule
-import createNameMaker from 'estree-idname-maker'
-// in global
-const { createNameMaker } = window.EstIdNameMaker
+import acorn from 'acorn'
+import UniqueIdGenerator from 'estree-unique-id'
+// const UniqueIdGenerator = window.$UniqueIdGenerator
+const script = `const a = 10`
+const generator = new UniqueIdGenerator(acorn.parse(script, { esmaVersion: 'latest', sourceType: 'module' }))
+console.log(generator.generate('a')) // $a
 ```
-### example
-```javascript
-import { parse } from 'acorn'
-const script = `
-  const var1 = 10
-  function fn2(var2) {
-    console.log(var1, var2)
-  }
-`
-const ast = parse(script, {
-  ecmaVersion: 'latest',
-  sourceType: 'script' 
-})
-// default retry fn: (old) => '$' + old
-const make = createNameMaker(ast)
-expect(make('var1')).toBe('$var1')
-expect(make('$var1')).toBe('$$var1')
-expect(make('console')).toBe('$console')
-```
-# Types
+# 核心类
+## UniqueIdGenerator
 ```typescript
-import { Program, BlockStatement } from 'estree'
-export type ContextNode = Program | BlockStatement
-export type Retry = (old: string) => string
-export type NameMaker = string | ((...args: any[]) => string)
-export function createNameMaker(node: ContextNode, retry?: Retry): (make: NameMaker) => string;
+import type { Program, BlockStatement, Function as EstFnc } from 'estree'
+type Context =  Program | BlockStatement | EstFnc
+class UniqueIdGenerator {
+  constructor(context: Context, retry?: (old: string) => string)
+  setContext(context: Context): void
+  setRetry(retry: (old: string) => string): void
+  setMaxRetryTimes(times: number): void
+  // 根据给定标识符名称进行生成
+  generate(name: string | ((...args: any[]) => string)): string
+  getGeneratedNames(): string[]
+}
 ```
++ 我们需要指定一个上下文，好让UniqueIdGenerator知道哪些标识符名称可以声明
++ 我们可以设置retry函数，如果目标名称已经存在了，则会调用它来尝试生成新的名称（尝试次数默认最大为100，可以通过setMaxRetryTimes改变它）。

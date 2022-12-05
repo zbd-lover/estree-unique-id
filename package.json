@@ -1,10 +1,10 @@
 {
-  "name": "estree-idname-maker",
-  "version": "1.0.5",
-  "description": "Make a identifier name without any negative effect in topest scope",
-  "main": "lib/estree-idname-maker.js",
-  "unpkg": "dist/estree-idname-maker.js",
-  "module": "es/estree-idname-maker.js",
+  "name": "estree-unique-id",
+  "version": "1.0.0",
+  "description": "generate a safe and unique identifier name based on estree",
+  "main": "lib/estree-unique-id.js",
+  "unpkg": "dist/estree-unique-id.js",
+  "module": "es/estree-unique-id.js",
   "types": "types/index.d.ts",
   "files": [
     "dist",
@@ -25,9 +25,7 @@
   },
   "keywords": [
     "estree",
-    "unique-identifier",
-    "unique-identifier-name-maker",
-    "unique-identifier-name-generator"
+    "unique-identifier"
   ],
   "author": "BaoDi Zheng",
   "license": "MIT",
@@ -37,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zbd-lover/estree-idname-maker.git"
+    "url": "git@github.com:zbd-lover/estree-unique-id.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",

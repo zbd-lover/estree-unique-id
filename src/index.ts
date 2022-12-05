@@ -1,56 +1,84 @@
-import { Program, BlockStatement } from 'estree'
-import { parse, Scope } from 'estree-identifier-parser'
+import type { Program, BlockStatement, Function as EstFnc } from 'estree'
+import { parse, type Scope } from 'estree-identifier-parser'
 
-export type ContextNode = Program | BlockStatement
-
-export type Retry = (old: string) => string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type NameMaker = string | ((...args: any[]) => string)
+export type Context = Program | BlockStatement | EstFnc
+export type RetryFn = (old: string) => string
 
 function retryWith$ (old: string) {
-  return '$' + old 
+  return '$' + old
 }
 
 function hasAncestralId (scope: Scope, name: string) {
   return scope.hasId((id) => id.scope === 'ancestral' && id.name === name)
 }
 
-export function createNameMaker (node: ContextNode, retry?: Retry) {
-  const scope = parse(node)
-  const generatedNames: string[] = []
-  const _retry = retry || retryWith$
 
-  const topScope = () => scope
+export default class UniqueIdGenerator {
+  private retry: RetryFn
+  private context: Scope
+  private retryTimes = 0
+  private maxRetryTimes = 100
+  private generatedNames: string[] = []
 
-  function canGen (scope: Scope, name: string) {
-    const top = topScope()
-    if (generatedNames.indexOf(name) >= 0) return false
-    if (top === scope && scope.hasId(name)) return false
-    if (top !== scope && hasAncestralId(scope, name)) return false
+  constructor (ctx: Context, retry?: RetryFn) {
+    const inFn = ctx.type !== 'BlockStatement' && ctx.type !== 'Program'
+    this.context = parse(!inFn ? ctx : { type: 'Program', sourceType: 'module', body: [ctx] } as Program)
+    if (inFn) {
+      this.context = this.context.children[0]
+      if (ctx.type !== 'ArrowFunctionExpression') {
+        if (ctx.id?.type) {
+          this.generatedNames.push(ctx.id.name)
+        }
+      }
+    }
+    this.retry = retry ?? retryWith$
+  }
 
-    for (let i = 0; i < scope.children.length; i++) {
-      const childScope = scope.children[i]
-      if (!canGen(childScope, name)) return false
+  public setRetry (retry: RetryFn) {
+    this.retry = retry
+  }
+
+  public setContext (ctx: Context) {
+    this.context = parse(ctx)
+  }
+
+  public setMaxRetryTimes (times: number) {
+    this.maxRetryTimes = times
+  }
+
+  public getGeneratedNames () {
+    return this.generatedNames
+  }
+
+  private isUnque (ctx: Scope, name: string) {
+    if (this.generatedNames.includes(name)) return false
+    if (ctx === this.context && ctx.hasId(name)) return false
+    if (ctx !== this.context && hasAncestralId(ctx, name)) return false
+
+    for (let i = 0; i < ctx.children.length; i++) {
+      const childCtx = ctx.children[i]
+      if (!this.isUnque(childCtx, name)) return false
     }
 
     return true
   }
 
-  return function make (make: NameMaker): string {
-    const name = typeof make === 'function' ? make() : String(make)
-
-    function recur (name: string): string {
-      if (!canGen(scope, name)) {
-        const nextName = _retry(name)
-        if (nextName === name) {
-          console.warn('The old name and new name are same!')
-        }
-        return recur(nextName)
-      }
-      generatedNames.push(name)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public generate (_name: string | ((...args: any[]) => string)): string {
+    const name = typeof _name === 'string' ? _name : _name()
+    if (this.isUnque(this.context, name)) {
+      this.retryTimes = 0
+      this.generatedNames.push(name)
       return name
     }
-
-    return recur(name)
+    const newName = this.retry(name)
+    this.retryTimes++
+    if (newName === name) {
+      if (this.retryTimes === this.maxRetryTimes) {
+        this.retryTimes = 0
+        throw new Error(`尝试生成有效变量名的次数超过最大尝试次数${this.maxRetryTimes}`)
+      }
+    }
+    return this.generate(newName)
   }
 }

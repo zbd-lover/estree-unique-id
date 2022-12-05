@@ -16,7 +16,7 @@ export default defineConfig([
   // CommonJS
   {
     input: './src/index.ts',
-    output: { file: 'lib/estree-idname-maker.js', format: 'commonjs', indent: false },
+    output: { file: 'lib/estree-unique-id.js', format: 'commonjs', indent: false },
     external,
     plugins: [
       typescript({
@@ -31,7 +31,7 @@ export default defineConfig([
   // ES
   {
     input: './src/index.ts',
-    output: { file: 'es/estree-idname-maker.js', format: 'es', indent: false },
+    output: { file: 'es/estree-unique-id.js', format: 'es', indent: false },
     external,
     plugins: [
       typescript({
@@ -47,7 +47,7 @@ export default defineConfig([
   // ES for Browsers
   {
     input: './src/index.ts',
-    output: { file: 'es/estree-idname-maker.mjs', format: 'es', indent: false },
+    output: { file: 'es/estree-unique-id.mjs', format: 'es', indent: false },
     external,
     plugins: [
       typescript({
@@ -78,9 +78,9 @@ export default defineConfig([
   {
     input: './src/index.ts',
     output: {
-      file: 'dist/estree-idname-maker.js',
+      file: 'dist/estree-unique-id.js',
       format: 'umd',
-      name: 'EstIdNamMaker',
+      name: 'UniqueIdGenerator',
       indent: false,
       exports: 'named'
     },
@@ -105,9 +105,9 @@ export default defineConfig([
   {
     input: './src/index.ts',
     output: {
-      file: 'dist/estree-idname-maker.min.js',
+      file: 'dist/estree-unique-id.min.js',
       format: 'umd',
-      name: 'EstIdNamMaker',
+      name: 'UniqueIdGenerator',
       indent: false,
       exports: 'named'
     },
