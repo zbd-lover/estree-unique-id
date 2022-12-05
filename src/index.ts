@@ -50,14 +50,14 @@ export default class UniqueIdGenerator {
     return this.generatedNames
   }
 
-  private isUnque (ctx: Scope, name: string) {
+  private isUnique (ctx: Scope, name: string) {
     if (this.generatedNames.includes(name)) return false
     if (ctx === this.context && ctx.hasId(name)) return false
     if (ctx !== this.context && hasAncestralId(ctx, name)) return false
 
     for (let i = 0; i < ctx.children.length; i++) {
       const childCtx = ctx.children[i]
-      if (!this.isUnque(childCtx, name)) return false
+      if (!this.isUnique(childCtx, name)) return false
     }
 
     return true
@@ -66,7 +66,7 @@ export default class UniqueIdGenerator {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public generate (_name: string | ((...args: any[]) => string)): string {
     const name = typeof _name === 'string' ? _name : _name()
-    if (this.isUnque(this.context, name)) {
+    if (this.isUnique(this.context, name)) {
       this.retryTimes = 0
       this.generatedNames.push(name)
       return name
