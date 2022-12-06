@@ -16,7 +16,7 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator1.getGeneratedNames()).toEqual(['$a'])
 
     const generator2 = new UniqueIdGenerator(parseScript('const b = 10'), (a: string) => '_' + a)
-    expect(generator2.generate('b')).toBe('_b')
+    expect(generator2.generate(() => 'b')).toBe('_b')
     expect(generator2.getGeneratedNames()).toEqual(['_b'])
   })
 
@@ -58,6 +58,12 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator.generate('a')).toBe('$a')
     expect(generator.generate('console')).toBe('$console')
     expect(generator.getGeneratedNames()).toEqual(['$a', '$console'])
+  })
+
+  test('应正确处理，当传入的值为关键字时', () => {
+    const ast = parseScript('')
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.generate('const')).toBe('$const')
   })
 
   test('测试重试机制是否正常工作', () => {
