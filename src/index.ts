@@ -29,6 +29,10 @@ function hasAncestralId (scope: Scope, name: string) {
   return scope.hasId((id) => id.scope === 'ancestral' && id.name === name)
 }
 
+function hasLocalId (scope: Scope, name: string) {
+  return scope.hasId((id) => id.scope === 'local' && id.name === name)
+}
+
 export default class UniqueIdGenerator {
   private retry: RetryFn
   private context: Scope
@@ -66,30 +70,31 @@ export default class UniqueIdGenerator {
     return this.generatedNames
   }
 
-  private isUniqueAndSafeInScope (ctx: Scope, name: string) {
+  private isSafeInScope (ctx: Scope, name: string) {
     if (ctx === this.context && ctx.hasId(name)) return false
     if (ctx !== this.context && hasAncestralId(ctx, name)) return false
 
     for (let i = 0; i < ctx.children.length; i++) {
       const childCtx = ctx.children[i]
-      if (!this.isUniqueAndSafeInScope(childCtx, name)) return false
+      if (!this.isSafeInScope(childCtx, name)) return false
     }
 
     return true
   }
 
-  public isUniqueAndSafe (name: string) {
-    return this.isUniqueAndSafeInScope(this.context, name)
+  public isSafe (name: string) {
+    if (specialWords.includes(name)) return false
+    return this.isSafeInScope(this.context, name)
+  }
+
+  public isUnique (name: string) {
+    return !this.generatedNames.includes(name) && !hasLocalId(this.context, name)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public generate (_name: string | ((...args: any[]) => string)): string {
     const name = typeof _name === 'string' ? _name : _name()
-    if (
-      !specialWords.includes(name) &&
-      !this.generatedNames.includes(name) &&
-      this.isUniqueAndSafeInScope(this.context, name)
-    ) {
+    if (this.isSafe(name) && this.isUnique(name)) {
       this.retryTimes = 0
       this.generatedNames.push(name)
       return name

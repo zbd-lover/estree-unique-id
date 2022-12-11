@@ -20,13 +20,24 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator2.getGeneratedNames()).toEqual(['_b'])
   })
 
+  test('测试方法：isSafe', () => {
+    const ast = parseScript('const a = 1; function fn() { console.log(1) }')
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.isSafe('a')).toBe(false)
+    expect(generator.isSafe('console')).toBe(false)
+    expect(generator.isSafe('fn')).toBe(false)
+    expect(generator.isSafe('b')).toBe(true)
+    expect(generator.isSafe('const')).toBe(false)
+  })
+
   test('测试方法：isUnique', () => {
     const ast = parseScript('const a = 1; function fn() { console.log(1) }')
     const generator = new UniqueIdGenerator(ast)
-    expect(generator.isUniqueAndSafe('a')).toBe(false)
-    expect(generator.isUniqueAndSafe('console')).toBe(false)
-    expect(generator.isUniqueAndSafe('fn')).toBe(false)
-    expect(generator.isUniqueAndSafe('b')).toBe(true)
+    expect(generator.isUnique('a')).toBe(false)
+    expect(generator.isUnique('fn')).toBe(false)
+    expect(generator.isUnique('console')).toBe(true)
+    expect(generator.isUnique('b')).toBe(true)
+    expect(generator.isUnique('const')).toBe(true)
   })
 
   test('测试方法：setRetry', () => {
