@@ -1,6 +1,6 @@
 {
   "name": "estree-unique-id",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "generate a safe and unique identifier name based on estree",
   "main": "lib/estree-unique-id.js",
   "unpkg": "dist/estree-unique-id.js",

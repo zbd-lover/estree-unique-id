@@ -12,6 +12,7 @@ export default class UniqueIdGenerator {
     setContext(ctx: Context): void;
     setMaxRetryTimes(times: number): void;
     getGeneratedNames(): string[];
-    private isUnique;
+    private _isUnique;
+    isUnique(name: string): boolean;
     generate(_name: string | ((...args: any[]) => string)): string;
 }

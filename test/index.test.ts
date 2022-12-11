@@ -20,6 +20,15 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator2.getGeneratedNames()).toEqual(['_b'])
   })
 
+  test('测试方法：isUnique', () => {
+    const ast = parseScript('const a = 1; function fn() { console.log(1) }')
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.isUnique('a')).toBe(false)
+    expect(generator.isUnique('console')).toBe(false)
+    expect(generator.isUnique('fn')).toBe(false)
+    expect(generator.isUnique('b')).toBe(true)
+  })
+
   test('测试方法：setRetry', () => {
     const generator = new UniqueIdGenerator(parseScript('const a = 10'))
     const retry = jest.fn((old) => old + '$')

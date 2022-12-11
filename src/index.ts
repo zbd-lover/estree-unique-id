@@ -12,7 +12,6 @@ function hasAncestralId (scope: Scope, name: string) {
   return scope.hasId((id) => id.scope === 'ancestral' && id.name === name)
 }
 
-
 export default class UniqueIdGenerator {
   private retry: RetryFn
   private context: Scope
@@ -50,23 +49,27 @@ export default class UniqueIdGenerator {
     return this.generatedNames
   }
 
-  private isUnique (ctx: Scope, name: string) {
+  private _isUnique (ctx: Scope, name: string) {
     if (this.generatedNames.includes(name)) return false
     if (ctx === this.context && ctx.hasId(name)) return false
     if (ctx !== this.context && hasAncestralId(ctx, name)) return false
 
     for (let i = 0; i < ctx.children.length; i++) {
       const childCtx = ctx.children[i]
-      if (!this.isUnique(childCtx, name)) return false
+      if (!this._isUnique(childCtx, name)) return false
     }
 
     return true
   }
 
+  public isUnique (name: string) {
+    return this._isUnique(this.context, name)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public generate (_name: string | ((...args: any[]) => string)): string {
     const name = typeof _name === 'string' ? _name : _name()
-    if (this.isUnique(this.context, name)) {
+    if (this._isUnique(this.context, name)) {
       this.retryTimes = 0
       this.generatedNames.push(name)
       return name

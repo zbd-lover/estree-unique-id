@@ -19,6 +19,7 @@ class UniqueIdGenerator {
   setContext(context: Context): void
   setRetry(retry: (old: string) => string): void
   setMaxRetryTimes(times: number): void
+  isUnique(name: string): boolean
   // 根据给定标识符名称进行生成
   generate(name: string | ((...args: any[]) => string)): string
   getGeneratedNames(): string[]
