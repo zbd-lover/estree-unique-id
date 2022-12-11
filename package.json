@@ -1,6 +1,6 @@
 {
   "name": "estree-unique-id",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "generate a safe and unique identifier name based on estree",
   "main": "lib/estree-unique-id.js",
   "unpkg": "dist/estree-unique-id.js",
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zbd-lover/estree-unique-id.git"
+    "url": "git@gitee.com:zheng-baodi/estree-unique-id.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",

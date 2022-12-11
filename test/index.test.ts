@@ -16,17 +16,17 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator1.getGeneratedNames()).toEqual(['$a'])
 
     const generator2 = new UniqueIdGenerator(parseScript('const b = 10'), (a: string) => '_' + a)
-    expect(generator2.generate('b')).toBe('_b')
+    expect(generator2.generate(() => 'b')).toBe('_b')
     expect(generator2.getGeneratedNames()).toEqual(['_b'])
   })
 
   test('测试方法：isUnique', () => {
     const ast = parseScript('const a = 1; function fn() { console.log(1) }')
     const generator = new UniqueIdGenerator(ast)
-    expect(generator.isUnique('a')).toBe(false)
-    expect(generator.isUnique('console')).toBe(false)
-    expect(generator.isUnique('fn')).toBe(false)
-    expect(generator.isUnique('b')).toBe(true)
+    expect(generator.isUniqueAndSafe('a')).toBe(false)
+    expect(generator.isUniqueAndSafe('console')).toBe(false)
+    expect(generator.isUniqueAndSafe('fn')).toBe(false)
+    expect(generator.isUniqueAndSafe('b')).toBe(true)
   })
 
   test('测试方法：setRetry', () => {
@@ -67,6 +67,12 @@ describe('测试核心类：UniqueIdGenerator', () => {
     expect(generator.generate('a')).toBe('$a')
     expect(generator.generate('console')).toBe('$console')
     expect(generator.getGeneratedNames()).toEqual(['$a', '$console'])
+  })
+
+  test('应正确处理，当传入的值为关键字时', () => {
+    const ast = parseScript('')
+    const generator = new UniqueIdGenerator(ast)
+    expect(generator.generate('const')).toBe('$const')
   })
 
   test('测试重试机制是否正常工作', () => {

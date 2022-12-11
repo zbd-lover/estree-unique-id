@@ -1,6 +1,23 @@
 import type { Program, BlockStatement, Function as EstFnc } from 'estree'
 import { parse, type Scope } from 'estree-identifier-parser'
 
+const specialWords = [
+  'debugger', 'with',
+  'null', 'undefined',
+  'var', 'let', 'const',
+  'function', 'async', 'await', 'yield',
+  'class', 'extends', 'new', 'this', 'super',
+  'return', 'break', 'continue',
+  'if', 'else',
+  'switch', 'case',
+  'for', 'do', 'while', 'of', 'in',
+  'throw', 'try', 'catch', 'finally',
+  'typeof', 'void', 'delete', 'instanceof', 'new',
+  'import', 'export', 'default',
+
+  'enum', 'package', 'public', 'private', 'protected', 'interface', 'implements', 'static'
+]
+
 export type Context = Program | BlockStatement | EstFnc
 export type RetryFn = (old: string) => string
 
@@ -49,27 +66,30 @@ export default class UniqueIdGenerator {
     return this.generatedNames
   }
 
-  private _isUnique (ctx: Scope, name: string) {
-    if (this.generatedNames.includes(name)) return false
+  private isUniqueAndSafeInScope (ctx: Scope, name: string) {
     if (ctx === this.context && ctx.hasId(name)) return false
     if (ctx !== this.context && hasAncestralId(ctx, name)) return false
 
     for (let i = 0; i < ctx.children.length; i++) {
       const childCtx = ctx.children[i]
-      if (!this._isUnique(childCtx, name)) return false
+      if (!this.isUniqueAndSafeInScope(childCtx, name)) return false
     }
 
     return true
   }
 
-  public isUnique (name: string) {
-    return this._isUnique(this.context, name)
+  public isUniqueAndSafe (name: string) {
+    return this.isUniqueAndSafeInScope(this.context, name)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public generate (_name: string | ((...args: any[]) => string)): string {
     const name = typeof _name === 'string' ? _name : _name()
-    if (this._isUnique(this.context, name)) {
+    if (
+      !specialWords.includes(name) &&
+      !this.generatedNames.includes(name) &&
+      this.isUniqueAndSafeInScope(this.context, name)
+    ) {
       this.retryTimes = 0
       this.generatedNames.push(name)
       return name
